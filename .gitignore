@@ -1,0 +1,14 @@
+*.cmd
+.idea/
+bower_components/
+node_modules/
+# public/components/
+public/document
+upload/*.*
+_windows/
+*.xml
+logs
+.DS_Store
+coverage
+review
+.env-dev

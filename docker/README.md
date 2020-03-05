@@ -1,5 +1,12 @@
 # read me
 > sysctl -w vm.max_map_count=262144
+> sysctl -w \
+  > net.ipv4.tcp_keepalive_time=600 \
+  > net.ipv4.tcp_keepalive_intvl=60 \
+  > net.ipv4.tcp_keepalive_probes=20
+
+  >> cat /proc/sys/net/ipv4/tcp_keepalive_time
+  
 > docker run -d -e ES_JAVA_POTS="-Xms256m -Xmx256m" -p 9200:9200 -p 9300:9300 -v /qpjoy/dt2/workplace/elasticsearch/es-master.yml:/usr/share/elasticsearch/config/elasticsearch.yml --name es-master elasticsearch:7.2.0
 
 
@@ -310,6 +317,8 @@ should应该满足，或匹配; must必须满足，与逻辑; must_not必须不�
 	}
 }
 
+### node elasticsearch api
+https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/introduction.html
 
 # reference
 1. https://blog.csdn.net/qq_22211217/article/details/94665069

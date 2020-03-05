@@ -1,10 +1,4 @@
-http://103.27.108.110:9200/_cat/nodes?v&pretty
-
-curl -XGET 'http://103.27.108.110:9200/_cat/nodes?v&pretty'
-
-steps:
-put customers products orders 
-put mobiles
-get indices
-
-curl -H "Content-Type: application/x-ndjson" -XPOST 'http://103.27.108.110:9200/customers/personal/_bulk?pretty&refresh' --data-binary @"customers.json"
+1. https://reacttraining.com/react-router/web/example/query-parameters
+2. https://www.npmjs.com/package/markdown-it-link-attributes
+3. https://stackoverflow.com/questions/51569981/how-to-use-react-links-when-rendering-content-with-dangerouslysetinnerhtml
+4. https://www.monterail.com/blog/how-to-index-objects-elasticsearch

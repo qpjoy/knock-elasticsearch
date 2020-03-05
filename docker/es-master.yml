@@ -1,0 +1,14 @@
+#开启跨域
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+#节点名称
+node.name: "node-1"
+#节点ip 单机默认回环地址 集群必须绑定真实ip
+network.host: 0.0.0.0
+#集群名称
+cluster.name: my-application
+#初始化选举的节点名称
+cluster.initial_master_nodes: ["node-1"]
+#用于发现其他节点 格式host：port
+discovery.seed_hosts: ["127.0.0.1:9200"]

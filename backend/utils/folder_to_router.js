@@ -18,6 +18,18 @@ var md = require('markdown-it')({
   typographer: true
 });
 
+const markdownItAnchor = require('markdown-it-anchor');
+const cheerio = require('cheerio');
+md.use(markdownItAnchor, {
+  level: 1,
+  // slugify: string => string,
+  permalink: false,
+  // renderPermalink: (slug, opts, state, permalink) => {},
+  permalinkClass: 'header-anchor',
+  permalinkSymbol: '¶',
+  permalinkBefore: false
+})
+
 const version = 'v1';
 const index = 'lilith_api';
 const { flatMap, map, set } = require('lodash');
@@ -107,6 +119,27 @@ var getFiles = function (filePath, key) {
           console.log(fileUrl);
           let data = fs.readFileSync(fileUrl, 'utf8');
           let marked = md.render(data);
+
+
+          const $ = cheerio.load(marked);
+          const idObj = $('[id]');
+          let ids = Array.prototype.map.call(idObj, function (item, index) {
+            // console.log(index, idObj[index]);
+            let id = '';
+            let text = '';
+            if (item['attribs']) {
+              id = item['attribs']['id'];
+            }
+            if (item['children'] && item['children'].length && item['children'][0]['data']) {
+              text = item['children'][0]['data']
+            }
+            console.log(id, text);
+            return {
+              url: `#${id}`,
+              title: `${text}`
+            };
+          })
+          console.log(ids);
           files.push({
             name: item,
             url: currentPath,
@@ -116,6 +149,7 @@ var getFiles = function (filePath, key) {
             content: data,
             folders: [],
             files: [],
+            anchors: ids,
             v: version,
             date: new Date()
           })
@@ -194,31 +228,31 @@ var listFolders = function () {
     console.log('Happy injecting');
 
     // setTimeout(() => {
-      const bodyStructure = [
-        { index: { _index: index, _id: 'structure' } },
-        {
-          name: '_structure',
-          url: '/_structure',
-          parentUrl: null,
-          type: null,
-          marked: null,
-          content: JSON.stringify(structure),
-          folders: [],
-          files: [],
-          v: version,
-          date: new Date()
-        }
-      ];
-      const bodyFolder = flatMap(bulkFolders, doc => [{ index: { _index: index, _id: doc.url } }, doc])
-      const bodyFile = flatMap(files, doc => [{ index: { _index: index, _id: doc.url } }, doc]);
-      const bodyAll = bodyStructure.concat(bodyFolder,bodyFile);
+    const bodyStructure = [
+      { index: { _index: index, _id: 'structure' } },
+      {
+        name: '_structure',
+        url: '/_structure',
+        parentUrl: null,
+        type: null,
+        marked: null,
+        content: JSON.stringify(structure),
+        folders: [],
+        files: [],
+        v: version,
+        date: new Date()
+      }
+    ];
+    const bodyFolder = flatMap(bulkFolders, doc => [{ index: { _index: index, _id: doc.url } }, doc])
+    const bodyFile = flatMap(files, doc => [{ index: { _index: index, _id: doc.url } }, doc]);
+    const bodyAll = bodyStructure.concat(bodyFolder, bodyFile);
 
-      console.log(bodyAll, JSON.stringify(structure));
-      client.bulk({ refresh: true, body: bodyAll }).then((err, res) => {
-        console.log(`Structure inject success!`,err, res);
-      }).catch((err) => {
-        console.log(err, '- - - - - - client error');
-      });
+    console.log(bodyAll, JSON.stringify(structure));
+    client.bulk({ refresh: true, body: bodyAll }).then((res) => {
+      console.log(`Structure inject success!`, res);
+    }).catch((err) => {
+      console.log(err, '- - - - - - client error');
+    });
     // },1000);
   }
 };

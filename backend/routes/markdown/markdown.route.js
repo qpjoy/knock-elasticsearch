@@ -35,7 +35,7 @@ async function markdown(fastify, options) {
     let md = await searchMD(path);
     if(md) {
       return {
-        md,
+        ...md,
         code: 0
       }
     }else {

@@ -1,4 +1,5 @@
 const { getStructure } = require('../../querys/structure.search');
+const { searchMD } = require('../../querys/markdown.search');
 
 async function markdown(fastify, options) {
   const opts = {
@@ -27,6 +28,22 @@ async function markdown(fastify, options) {
       }
     }
   })
+
+  fastify.get('/search', async(request, reply) => {
+    const {path} = request.query;
+
+    let md = await searchMD(path);
+    if(md) {
+      return {
+        md,
+        code: 0
+      }
+    }else {
+      return {
+        code: -1
+      }
+    }
+  });
 
   fastify.get('/markdown', opts, async (request, reply) => {
     console.log(request.ip)

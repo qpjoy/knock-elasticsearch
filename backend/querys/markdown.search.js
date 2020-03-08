@@ -12,25 +12,25 @@ const searchMD = async (path) => {
             //         url: path,
             //     }
             // },
-            // "query": {
-            //     "bool": {
-            //         "filter": {
-            //             "term": {
-            //                 "url": path
-            //             }
-            //         }
-            //     }
-            // },
             "query": {
-                "constant_score": {
+                "bool": {
                     "filter": {
-                        "match": {
+                        "term": {
                             "url": path
                         }
-                    }                    
+                    }
                 }
             },
-            "_source":["marked", "anchors"],
+            // "query": {
+            //     "constant_score": {
+            //         "filter": {
+            //             "match": {
+            //                 "url": path
+            //             }
+            //         }                    
+            //     }
+            // },
+            "_source":["marked", "chapters"],
         }
     }, {
         ignore: [404],

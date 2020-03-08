@@ -1,4 +1,4 @@
-const {client} = require('../../utils/elasticsearch.config');
+const {client} = require('./elasticsearch.config');
 
 client.indices.create({
     index: 'lilith_api',
@@ -11,6 +11,8 @@ client.indices.create({
           type: { type: 'keyword' },
           marked: {
             type: 'text',
+            analyzer: "ik_max_word",
+            search_analyzer: "ik_smart",
             index: 'true'
           },
           content: {
@@ -38,14 +40,23 @@ client.indices.create({
               }
             }
           },
-          anchors: {
+          chapters: {
             type: 'nested',
             properties: {
               url: {
                 type: "keyword"
               },
+              anchor: {
+                type: "keyword"
+              },
               title: {
                 type: "keyword"
+              },
+              chapter: {
+                type: 'text',
+                analyzer: "ik_max_word",
+                search_analyzer: "ik_smart",
+                index: 'true'
               }
             }
           },

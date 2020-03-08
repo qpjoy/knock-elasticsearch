@@ -1,5 +1,6 @@
 const { getStructure } = require('../../querys/structure.search');
 const { searchMD } = require('../../querys/markdown.search');
+const { searchChapter} = require('../../querys/chapter.search');
 
 async function markdown(fastify, options) {
   const opts = {
@@ -30,27 +31,41 @@ async function markdown(fastify, options) {
   })
 
   fastify.get('/search', async(request, reply) => {
-    const {path} = request.query;
+    const {path, keyword} = request.query;
+    console.log(path, keyword,' this is params')
 
-    let md = await searchMD(path);
-    if(md) {
-      return {
-        ...md,
-        code: 0
+    if(path) {
+      let md = await searchMD(path);
+      if(md) {
+        return {
+          ...md,
+          code: 0
+        }
+      }else {
+        return {
+          code: -1
+        }
+      }
+    }else if(keyword) {
+      let ch = await searchChapter(keyword);
+      if(ch) {
+        return {
+          ...ch,
+          code: 0
+        }
+      }else {
+        return {
+          msg: 'not found',
+          code: -1
+        }
       }
     }else {
       return {
-        code: -1
+        code: -1,
+        msg: 'parameters error'
       }
-    }
+    }    
   });
-
-  fastify.get('/markdown', opts, async (request, reply) => {
-    console.log(request.ip)
-    console.log(request.ips)
-    console.log(request.hostname)
-    return { hello: 'Markdown' }
-  })
 }
 
 module.exports = markdown

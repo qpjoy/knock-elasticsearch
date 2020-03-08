@@ -1,19 +1,10 @@
-const { Client } = require('@elastic/elasticsearch')
-const client = new Client({
-  nodes: ['http://23.225.161.124:9200'],
-  // requestTimeout: 10000,
-  // sniffInterval: 500,
-  // sniffOnStart: true,
-  // sniffOnConnectionFault: true
-})
-// client.on('sniff', (err, req) => {
-//   console.log('snif', err ? err.message : '', `${JSON.stringify(req.meta.sniff)}`)
-// })
+const {client } = require('./elasticsearch.config');
 
 var fs = require('fs'),
   path = require('path');
 var md = require('markdown-it')({
   html: true,
+  // breaks: false,
   linkify: true,
   typographer: true
 });
@@ -121,25 +112,7 @@ var getFiles = function (filePath, key) {
           let marked = md.render(data);
 
 
-          const $ = cheerio.load(marked);
-          const idObj = $('[id]');
-          let ids = Array.prototype.map.call(idObj, function (item, index) {
-            // console.log(index, idObj[index]);
-            let id = '';
-            let text = '';
-            if (item['attribs']) {
-              id = item['attribs']['id'];
-            }
-            if (item['children'] && item['children'].length && item['children'][0]['data']) {
-              text = item['children'][0]['data']
-            }
-            console.log(id, text);
-            return {
-              url: `#${id}`,
-              title: `${text}`
-            };
-          })
-          console.log(ids);
+          let chapters = splitChapters(marked, currentPath);                  
           files.push({
             name: item,
             url: currentPath,
@@ -149,7 +122,7 @@ var getFiles = function (filePath, key) {
             content: data,
             folders: [],
             files: [],
-            anchors: ids,
+            chapters,
             v: version,
             date: new Date()
           })
@@ -415,6 +388,57 @@ function getStructure(path, currentPathInherit, structure) {
       }
     })
   })
+}
+
+
+function splitChapters(html, url) {
+  // load the raw HTML
+  // it needs to all be wrapped in *one* big wrapper
+  const $ = cheerio.load(`<div id="_body">${html}</div>`);
+  // the end goal
+  const blocks = [];
+  // the buffer
+  const section = cheerio
+      .load("<div></div>", { decodeEntities: false })("div")
+      .eq(0);
+
+  const iterable = [...$("#_body")[0].childNodes];
+  let c = 0;
+  iterable.forEach(child => {
+      if (["h1", "h2", "h3", "h4", "h5", "h6", "h7"].indexOf(child.tagName) >= 0) {
+          if (c) {
+              blocks.push(section.clone());
+              section.empty();
+              c = 0; // reset the counter
+          }
+      }
+      c++;
+      section.append(child);
+  });
+  if (c) {
+      blocks.push(section.clone());
+  }
+  const blocksAsObj = blocks.map(block => {
+      console.log(block[0]['children'][0], ' - - this is block')
+      let id = '';
+      let text = '';
+      if(block && block[0] && block[0]['children'] && block[0]['children'][0]) {
+          let temp = block[0]['children'][0];
+          if(temp['attribs'] && temp['attribs']['id']) {
+              id = temp['attribs']['id'];
+          }
+          if(temp['children'] && temp['children'][0]) {
+              text = temp['children'][0]['data'];
+          }        
+      }
+      return {
+          url: `${url}`,
+          anchor: `#${id}`,
+          title: `${text}`,
+          chapter: block.html()
+      }
+  });
+  return blocksAsObj;
 }
 
 folders[key] = {

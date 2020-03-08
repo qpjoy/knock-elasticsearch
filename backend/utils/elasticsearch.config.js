@@ -1,6 +1,7 @@
 const { Client } = require('@elastic/elasticsearch')
 const client = new Client({
-  nodes: ['http://23.225.161.124:9200'],
+  // nodes: ['http://23.225.161.124:9200'],
+  nodes: ['http://127.0.0.1:9200'],
   // requestTimeout: 5000,
   // sniffInterval: 500,
   // sniffOnStart: true,
